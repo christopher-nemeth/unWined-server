@@ -10,26 +10,30 @@ app.use(bodyParser.json())
 app.use(morgan('dev'))
 app.use(cors())
 
-
-app.get('/hikes', (req, res) => {
-  knex.from('hikes')
+app.get('/users', (req, res) => {
+  knex.from('users')
     .then(data => res.status(200).json({data}))
     .catch(error => res.status(500).json({ error: error.message, stack: error.stack }))
 })
 
-app.get('/hikes/:id', (req, res) => {
-  knex.from('hikes')
-    .where({ id: req.params.id })
-    .then(data => res.status(200).json({data}))
-    .catch(error => res.status(500).json({ error: error.message, stack: error.stack }))
+app.get('/users/:id/', (request, response, next) => {
+  return knex('users').innerJoin('wine', 'users.id', 'wine.users_id')
+    .where('users.id', request.params.id)
+    .then(user => {
+      if (user) {
+        return response.json(user)
+      } else {
+        return response.status(404).send({ message: 'User doesn\'t exist!' })
+      }
+    })
 })
 
-app.put('/hikes/:id', (req, res) => {
-  knex.from('hikes')
+app.put('/users/:id', (req, res) => {
+  knex.from('users')
     .where({ id: req.params.id })
     .update(req.body)
     .then(() => {
-      knex.from('hikes')
+      knex.from('users')
         .then(data =>
           res.status(200).json({ data }))
     }
@@ -37,20 +41,69 @@ app.put('/hikes/:id', (req, res) => {
 .catch(error => res.status(500).json({ error: error.message, stack: error.stack }))
 })
 
-app.post('/hikes', (req, res) => {
-  knex.from('hikes')
+app.post('/users', (req, res) => {
+  knex.from('users')
     .insert(req.body)
     // .returning('*')
     .then(data => res.status(200).json({data}))
     .catch(error => res.status(500).json({ error: error.message, stack: error.stack }))
 })
 
-app.delete('/hikes/:id', (req, res) => {
-  knex.from('hikes')
+app.delete('/users/:id', (req, res) => {
+  knex.from('users')
     .where({ id: req.params.id })
     .del()
     .then(() => {
-      knex.from('hikes')
+      knex.from('users')
+        // .where({ id: req.params.id })
+        .then(data =>
+          res.status(200).json({ data }))
+    }
+  )
+.catch(error => res.status(500).json({ error: error.message, stack: error.stack }))
+})
+
+app.get('/wine', (req, res) => {
+  knex.from('wine')
+    .then(data => res.status(200).json({data}))
+    .catch(error => res.status(500).json({ error: error.message, stack: error.stack }))
+})
+
+app.get('/wine/:id', (req, res) => {
+  knex.from('wine')
+    .where({ id: req.params.id })
+    .then(data => res.status(200).json({data}))
+    .catch(error => res.status(500).json({ error: error.message, stack: error.stack }))
+})
+
+app.put('/wine/:id', (req, res) => {
+  knex.from('wine')
+    .where({ id: req.params.id })
+    .update(req.body)
+    .then(() => {
+      knex.from('wine')
+        .then(data =>
+          res.status(200).json({ data }))
+    }
+  )
+.catch(error => res.status(500).json({ error: error.message, stack: error.stack }))
+})
+
+app.post('/wine', (req, res) => {
+  console.log(req.body)
+  knex.from('wine')
+    .insert(req.body)
+    // .returning('*')
+    .then(data => res.status(200).json({data}))
+    .catch(error => res.status(500).json({ error: error.message, stack: error.stack }))
+})
+
+app.delete('/wine/:id', (req, res) => {
+  knex.from('wine')
+    .where({ id: req.params.id })
+    .del()
+    .then(() => {
+      knex.from('wine')
         // .where({ id: req.params.id })
         .then(data =>
           res.status(200).json({ data }))
